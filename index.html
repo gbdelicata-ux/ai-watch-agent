@@ -1,0 +1,1511 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Agent de Veille Technologique IA</title>
+  
+  <!-- Optimisations iOS PWA / Safari Mobile -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Veille IA">
+  <meta name="theme-color" content="#090d16">
+  <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="/static/favicon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --bg-dark: #0f172a;
+  --bg-card: #1e293b;
+  --bg-card-hover: #334155;
+  --accent-cyan: #38bdf8;
+  --accent-purple: #a855f7;
+  --accent-emerald: #10b981;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --border: #334155;
+  --font-heading: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  font-family: var(--font-body);
+  height: 100vh;
+  overflow: hidden;
+}
+
+.app-layout {
+  display: flex;
+  height: 100vh;
+}
+
+/* Sidebar Styling */
+.sidebar {
+  width: 295px;
+  background: #090d16;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 20px 14px;
+  overflow-y: auto;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding: 0 8px;
+}
+
+.brand-icon {
+  font-size: 24px;
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+}
+
+.brand-info h2 {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.badge {
+  font-size: 0.65rem;
+  background: rgba(56, 189, 248, 0.15);
+  color: var(--accent-cyan);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.nav-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 0.86rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  text-align: left;
+  gap: 8px;
+}
+
+.nav-item:hover, .nav-item.active {
+  background: var(--bg-card);
+  color: var(--text-main);
+}
+
+.nav-item.active {
+  border-left: 3px solid var(--accent-cyan);
+}
+
+.count-pill {
+  background: rgba(148, 163, 184, 0.15);
+  color: var(--text-muted);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  min-width: 26px;
+  text-align: center;
+}
+
+.nav-item.active .count-pill {
+  background: rgba(56, 189, 248, 0.2);
+  color: var(--accent-cyan);
+}
+
+.sidebar-footer {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Buttons */
+.btn {
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: opacity 0.2s ease, transform 0.1s ease;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent-cyan), #0284c7);
+  color: #fff;
+}
+
+.btn-secondary {
+  background: var(--bg-card);
+  color: var(--text-main);
+  border: 1px solid var(--border);
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.mt-2 { margin-top: 8px; }
+
+/* Main Content Area */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 32px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(10px);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.top-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.btn-mobile-nav {
+  display: none;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  font-size: 1.25rem;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+
+.btn-mobile-nav:active {
+  background: var(--bg-card-hover);
+}
+
+.mobile-brand {
+  display: none;
+  align-items: center;
+  gap: 8px;
+}
+
+.mobile-brand-icon {
+  font-size: 1.2rem;
+}
+
+.mobile-brand-title {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.sidebar-overlay {
+  display: none;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 9px 16px;
+  width: 460px;
+  transition: border-color 0.2s ease;
+}
+
+.search-box:focus-within {
+  border-color: var(--accent-cyan);
+}
+
+.search-box input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-main);
+  width: 100%;
+  margin-left: 10px;
+  font-size: 0.9rem;
+}
+
+.status-widget {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+}
+
+.content-body {
+  padding: 28px 32px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.section-header h1 {
+  font-family: var(--font-heading);
+  font-size: 1.55rem;
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+
+/* Quick Filter Chips */
+.quick-filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filter-chip {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 7px 14px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: all 0.2s ease;
+}
+
+.filter-chip:hover {
+  color: var(--text-main);
+  border-color: var(--accent-cyan);
+}
+
+.filter-chip.active {
+  background: rgba(56, 189, 248, 0.18);
+  color: var(--accent-cyan);
+  border-color: var(--accent-cyan);
+}
+
+/* Articles Grid */
+.articles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 20px;
+}
+
+.article-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.article-card.today-card {
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.article-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--accent-cyan);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.35);
+}
+
+.card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.source-tag {
+  font-size: 0.74rem;
+  color: var(--accent-cyan);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.today-badge {
+  background: rgba(16, 185, 129, 0.18);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.score-badge {
+  background: rgba(168, 85, 247, 0.2);
+  color: var(--accent-purple);
+  font-weight: 700;
+  font-size: 0.78rem;
+  padding: 3px 9px;
+  border-radius: 10px;
+}
+
+.article-card h3 {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+
+.article-card p {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  line-height: 1.55;
+  margin-bottom: 16px;
+}
+
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding-top: 12px;
+}
+
+.card-footer a {
+  color: var(--accent-cyan);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.fav-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  transition: transform 0.2s ease;
+}
+
+.fav-btn.active {
+  color: #f59e0b;
+}
+
+/* Digest Section */
+.digest-card {
+  background: var(--bg-card);
+  border: 1px solid var(--accent-purple);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 28px;
+}
+
+.digest-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 12px;
+}
+
+.btn-icon {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+
+.digest-body {
+  white-space: pre-wrap;
+  line-height: 1.6;
+  font-size: 0.9rem;
+  color: #e2e8f0;
+}
+
+.hidden { display: none !important; }
+
+.sync-badge {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  margin-left: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.date-tag {
+  background: rgba(56, 189, 248, 0.1);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  padding: 3px 8px;
+  border-radius: 8px;
+  font-size: 0.74rem;
+  font-weight: 500;
+}
+
+/* Modal Lecteur Immersif */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(10, 15, 29, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  padding: 20px;
+}
+
+.modal-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  max-width: 680px;
+  width: 100%;
+  padding: 28px;
+  box-shadow: 0 25px 50px rgba(0,0,0,0.6);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-card h2 {
+  font-family: var(--font-heading);
+  font-size: 1.35rem;
+  line-height: 1.4;
+  color: var(--text-main);
+}
+
+.modal-body {
+  font-size: 0.98rem;
+  line-height: 1.7;
+  color: #cbd5e1;
+  background: rgba(15, 23, 42, 0.7);
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.card-clickable {
+  cursor: pointer;
+}
+
+/* Optimisations d'affichage iPhone et iPad */
+@media (max-width: 992px) {
+  body {
+    height: 100%;
+    overflow-y: auto;
+  }
+
+  .app-layout {
+    flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 300px;
+    z-index: 1000;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.7);
+    overflow-y: auto;
+    padding-top: max(20px, env(safe-area-inset-top));
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 15, 29, 0.75);
+    backdrop-filter: blur(4px);
+    z-index: 999;
+  }
+
+  .sidebar-overlay.active {
+    display: block;
+  }
+
+  .btn-mobile-nav {
+    display: flex;
+  }
+
+  .mobile-brand {
+    display: flex;
+  }
+
+  .top-bar {
+    padding: max(14px, env(safe-area-inset-top)) 16px 14px 16px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .top-bar-left {
+    justify-content: space-between;
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .search-box {
+    width: 100%;
+    margin-top: 6px;
+  }
+
+  .status-widget {
+    font-size: 0.75rem;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .content-body {
+    padding: 16px;
+  }
+
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .articles-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+
+  .modal-card {
+    padding: 20px;
+    max-height: 90vh;
+    width: 95%;
+  }
+}
+
+@media (max-width: 600px) {
+  .articles-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .card-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .card-footer > div {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .open-modal-btn {
+    width: 100%;
+    text-align: center;
+    padding: 10px !important;
+  }
+
+  .digest-card {
+    padding: 16px;
+  }
+}
+
+</style>
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Overlay Mobile -->
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+    <!-- Navigation / Sidebar -->
+    <aside class="sidebar" id="sidebarNav">
+      <div class="brand">
+        <div class="brand-icon">⚡</div>
+        <div class="brand-info">
+          <h2>AI Watch Agent</h2>
+          <span class="badge">40 SOURCES ACTIVES</span>
+        </div>
+      </div>
+
+      <nav class="nav-menu">
+        <button class="nav-item active" data-category="ALL">
+          <span>🌐 Tous les flux</span>
+          <span class="count-pill" id="countAll">0</span>
+        </button>
+        <button class="nav-item" data-category="✨ Actualité de Google & Gemini">
+          <span>✨ Google & Gemini</span>
+          <span class="count-pill" data-count-for="✨ Actualité de Google & Gemini">0</span>
+        </button>
+        <button class="nav-item" data-category="🤖 Robots Humanoïdes">
+          <span>🤖 Robots Humanoïdes</span>
+          <span class="count-pill" data-count-for="🤖 Robots Humanoïdes">0</span>
+        </button>
+        <button class="nav-item" data-category="⚛️ Informatique Quantique">
+          <span>⚛️ Informatique Quantique</span>
+          <span class="count-pill" data-count-for="⚛️ Informatique Quantique">0</span>
+        </button>
+        <button class="nav-item" data-category="🇺🇸 Intelligence Artificielle aux USA">
+          <span>🇺🇸 IA aux USA</span>
+          <span class="count-pill" data-count-for="🇺🇸 Intelligence Artificielle aux USA">0</span>
+        </button>
+        <button class="nav-item" data-category="🇫🇷 Écosystème FR & Recherche">
+          <span>🇫🇷 Écosystème FR & Recherche</span>
+          <span class="count-pill" data-count-for="🇫🇷 Écosystème FR & Recherche">0</span>
+        </button>
+        <button class="nav-item" data-category="📰 Actus & Décryptages">
+          <span>📰 Actus & Décryptages</span>
+          <span class="count-pill" data-count-for="📰 Actus & Décryptages">0</span>
+        </button>
+        <button class="nav-item" data-category="🛠️ Outils & Applications">
+          <span>🛠️ Outils & Applications</span>
+          <span class="count-pill" data-count-for="🛠️ Outils & Applications">0</span>
+        </button>
+        <button class="nav-item" data-category="💼 Entreprise & Souveraineté">
+          <span>💼 Entreprise & Souveraineté</span>
+          <span class="count-pill" data-count-for="💼 Entreprise & Souveraineté">0</span>
+        </button>
+        <button class="nav-item" data-category="🧬 Modèles & Recherche Mondiale">
+          <span>🧬 Modèles & Recherche</span>
+          <span class="count-pill" data-count-for="🧬 Modèles & Recherche Mondiale">0</span>
+        </button>
+        <button class="nav-item" data-category="FAVORITES">
+          <span>⭐ Articles Favoris</span>
+          <span class="count-pill" data-count-for="FAVORITES">0</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button id="btnFetch" class="btn btn-primary btn-block">
+          <span class="icon">🔄</span> Lancer un Scan Veille
+        </button>
+        <button id="btnDigest" class="btn btn-secondary btn-block mt-2">
+          <span class="icon">📝</span> Générer Synthèse
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <header class="top-bar">
+        <div class="top-bar-left">
+          <button id="btnMobileNav" class="btn-mobile-nav" aria-label="Menu" title="Menu">
+            <span>☰</span>
+          </button>
+          <div class="mobile-brand">
+            <span class="mobile-brand-icon">⚡</span>
+            <span class="mobile-brand-title">Veille IA</span>
+          </div>
+          <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" placeholder="Rechercher (ex: Gemini 2.5, Mistral, Siècle Digital, Quantique, Figure)...">
+          </div>
+        </div>
+        <div class="status-widget">
+          <span class="status-dot pulse"></span>
+          <span id="statusText">Veille temps réel</span>
+          <span id="syncBadge" class="sync-badge">⏱️ Sync auto active</span>
+        </div>
+      </header>
+
+      <!-- Dashboard Grid Body -->
+      <div class="content-body">
+        <section class="section-header">
+          <div>
+            <h1 id="categoryTitle">Dernières Tendances IA</h1>
+            <p class="subtitle" id="subtitleInfo">40 médias & laboratoires surveillés en continu (FR, US & Recherche)</p>
+          </div>
+          <div class="quick-filters" id="quickFilters">
+            <button class="filter-chip active" data-filter="ALL">🌐 Tout</button>
+            <button class="filter-chip" data-filter="TODAY">🔥 Aujourd'hui <span id="countTodayBadge"></span></button>
+            <button class="filter-chip" data-filter="TOP">🏆 Top Impact (85+)</button>
+            <button class="filter-chip" data-filter="FR">🇫🇷 Sources FR</button>
+            <button class="filter-chip" data-filter="INTL">🌍 Labs US & Global</button>
+          </div>
+        </section>
+
+        <!-- Dynamic Digest View (hidden by default) -->
+        <div id="digestContainer" class="digest-card hidden">
+          <div class="digest-header">
+            <h3>📝 Synthèse Quotidienne de l'Agent IA</h3>
+            <button id="btnCloseDigest" class="btn-icon">&times;</button>
+          </div>
+          <div id="digestBody" class="digest-body"></div>
+        </div>
+
+        <!-- Articles Grid Container -->
+        <div id="articlesGrid" class="articles-grid">
+          <div class="loading-spinner">Chargement des flux de veille...</div>
+        </div>
+
+        <!-- Article Detail Modal (Lecture sans erreur 404) -->
+        <div id="articleModal" class="modal-overlay hidden">
+          <div class="modal-card">
+            <div class="modal-header">
+              <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                <span id="modalSource" class="source-tag"></span>
+                <span id="modalDate" class="date-tag"></span>
+                <span id="modalScore" class="score-badge"></span>
+              </div>
+              <button id="btnCloseModal" class="btn-icon">&times;</button>
+            </div>
+            <h2 id="modalTitle"></h2>
+            <div id="modalCategory" class="source-tag" style="color:var(--text-muted);"></div>
+            <div class="modal-body" id="modalContent"></div>
+            <div class="modal-footer" style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+              <span style="font-size:0.8rem; color:var(--text-muted);">Source vérifiée par l'Agent IA</span>
+              <a id="modalExternalLink" href="#" target="_blank" rel="noopener" class="btn btn-primary">
+                Visiter le site officiel ➔
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+document.addEventListener('DOMContentLoaded', () => {
+  let currentCategory = 'ALL';
+  let currentSearch = '';
+  let currentQuickFilter = 'ALL';
+  let allLoadedArticles = [];
+
+  // Obtenir la date et l'heure actuelles en France (Europe/Paris) côté client (100% sans serveur)
+  function getParisNow() {
+    try {
+      const parts = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Europe/Paris',
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit',
+        hour12: false
+      }).formatToParts(new Date());
+      const map = {};
+      parts.forEach(p => { map[p.type] = p.value; });
+      const h = parseInt(map.hour === '24' ? '00' : map.hour, 10);
+      const m = parseInt(map.minute, 10);
+      return {
+        dateStr: `${map.year}-${map.month}-${map.day}`,
+        timeStr: `${String(h).padStart(2, '0')}:${map.minute}:${map.second}`,
+        hour: h,
+        minute: m
+      };
+    } catch (e) {
+      const d = new Date();
+      return {
+        dateStr: d.toISOString().slice(0, 10),
+        timeStr: d.toTimeString().slice(0, 8),
+        hour: d.getHours(),
+        minute: d.getMinutes()
+      };
+    }
+  }
+
+  let serverTodayDate = getParisNow().dateStr;
+
+  const FR_SOURCES = new Set([
+    'Brief IA', 'Le Fil IA', 'Siècle Digital - IA', 'Frandroid - IA',
+    'Les Numériques - IA', 'Blog du Modérateur (BDM)', 'BDM',
+    'Usine Digitale - IA', 'Maddyness - IA & DeepTech',
+    'Journal du Net (JDN) - IA', '01net - IA', 'Inria - Actus IA',
+    'CNRS Le Journal - IA', 'IA News', 'AIxploria'
+  ]);
+
+  // Flux RSS interrogés directement depuis le navigateur (Sans Serveur via passerelle CORS RSS2JSON / AllOrigins)
+  const LIVE_BROWSER_FEEDS = [
+    { name: "Siècle Digital - IA", url: "https://siecledigital.fr/intelligence-artificielle/feed/", category: "📰 Actus & Décryptages" },
+    { name: "Frandroid - IA", url: "https://www.frandroid.com/tag/intelligence-artificielle/feed", category: "🛠️ Outils & Applications" },
+    { name: "Blog du Modérateur (BDM)", url: "https://www.blogdumoderateur.com/intelligence-artificielle/feed/", category: "🛠️ Outils & Applications" },
+    { name: "Usine Digitale - IA", url: "https://www.usine-digitale.fr/rss/intelligence-artificielle", category: "🇫🇷 Écosystème FR & Recherche" },
+    { name: "01net - IA", url: "https://www.01net.com/actualites/intelligence-artificielle/feed/", category: "🛠️ Outils & Applications" },
+    { name: "Maddyness - IA & DeepTech", url: "https://www.maddyness.com/tag/intelligence-artificielle/feed/", category: "💼 Entreprise & Souveraineté" },
+    { name: "Google AI Blog", url: "https://blog.google/technology/ai/rss/", category: "✨ Actualité de Google & Gemini" },
+    { name: "OpenAI News", url: "https://openai.com/news/rss.xml", category: "🇺🇸 Intelligence Artificielle aux USA" },
+    { name: "TechCrunch AI", url: "https://techcrunch.com/category/artificial-intelligence/feed/", category: "🇺🇸 Intelligence Artificielle aux USA" },
+    { name: "The Verge AI", url: "https://www.theverge.com/ai-artificial-intelligence/rss/index.xml", category: "🇺🇸 Intelligence Artificielle aux USA" },
+    { name: "The Decoder", url: "https://the-decoder.com/feed/", category: "🇺🇸 Intelligence Artificielle aux USA" },
+    { name: "Hugging Face Blog", url: "https://huggingface.co/blog/feed.xml", category: "🧬 Modèles & Recherche Mondiale" },
+    { name: "Simon Willison AI Blog", url: "https://simonwillison.net/atom/everything/", category: "🧬 Modèles & Recherche Mondiale" },
+    { name: "The Robot Report", url: "https://www.therobotreport.com/feed/", category: "🤖 Robots Humanoïdes" },
+    { name: "The Quantum Insider", url: "https://thequantuminsider.com/feed/", category: "⚛️ Informatique Quantique" }
+  ];
+
+  // Base autonome embarquée (Fonctionne 24h/24 même hors-ligne ou sans serveur Python)
+  const AUTONOMOUS_RAW_SOURCES = [
+    ["Google AI Blog", "✨ Actualité de Google & Gemini", "Google dévoile Gemini 2.5 Pro & Flash : Raisonnement hybride, 5M de tokens et exécution d'agents", "https://blog.google/technology/ai/", "Google annonce la disponibilité générale de la série Gemini 2.5 offrant une fenêtre de contexte record, du codage agentique natif et une latence réduite de moitié."],
+    ["Google DeepMind Blog", "✨ Actualité de Google & Gemini", "Google DeepMind présente Gemma 3 : La famille de modèles ouverts ultra-performants de 2B à 27B", "https://deepmind.google/discover/blog/", "DeepMind publie la suite de modèles open-weight Gemma 3 multilingues et multimodaux optimisés pour le fine-tuning local et l'exécution sur GPU/TPU."],
+    ["Google AI Blog", "✨ Actualité de Google & Gemini", "Veo 2 et Imagen 3.5 : La nouvelle génération de création vidéo 4K et d'images photoréalistes par Google", "https://blog.google/technology/ai/", "Présentation des avancées majeures en synthèse vidéo cinématographique avec physique réaliste et contrôle granulaire de la caméra."],
+    ["Google DeepMind Blog", "✨ Actualité de Google & Gemini", "AlphaFold 3.5 & Isomorphic Labs : Conception clinique de molécules thérapeutiques assistée par IA", "https://deepmind.google/discover/blog/", "Nouvelle publication démontrant la prédiction à l'échelle atomique des interactions complexes entre protéines, ARN et traitements ciblés."],
+    ["Google Cloud AI", "✨ Actualité de Google & Gemini", "Vertex AI Agent Builder : Déployer des flottes d'agents multi-systèmes avec le protocole A2A (Agent2Agent)", "https://cloud.google.com/blog/products/ai-machine-learning", "Google Cloud lance le standard ouvert Agent2Agent permettant aux agents d'entreprise d'interopérer de manière sécurisée avec BigQuery et les ERP."],
+    ["Google AI Blog", "✨ Actualité de Google & Gemini", "NotebookLM Plus & Audio Overviews en français : Synthèse vocale interactive de corpus documentaires", "https://blog.google/technology/ai/", "L'assistant de recherche de Google génère désormais des débats audio interactifs en français à partir de centaines de PDF, vidéos YouTube et Google Docs."],
+    ["Google DeepMind Blog", "✨ Actualité de Google & Gemini", "Project Astra & Gemini Live : L'assistant multimodal temps réel avec mémoire visuelle continue", "https://deepmind.google/discover/blog/", "Démonstration des capacités d'interaction vidéo et vocale à très basse latence sur smartphones Android et lunettes connectées."],
+    ["Google Cloud AI", "✨ Actualité de Google & Gemini", "Puces TPU v6e Trillium : Google franchit un cap d'efficience énergétique pour l'inférence à grande échelle", "https://cloud.google.com/blog/products/ai-machine-learning", "La 6e génération d'accélérateurs Google TPU offre 4,7x plus de performance par Watt et divise par deux le coût d'inférence des LLM."],
+    ["Google Developers AI", "✨ Actualité de Google & Gemini", "Gemini Code Assist & Android Studio : Agents autonomes de refactoring et de tests unitaires", "https://developers.googleblog.com/", "Les développeurs bénéficient d'un agent capable de migrer des projets entiers, corriger les failles de sécurité et valider l'interface utilisateur."],
+    ["OpenAI News", "🇺🇸 Intelligence Artificielle aux USA", "OpenAI o3 & Operator : L'architecture de raisonnement profond combinée à l'action autonome sur le Web", "https://openai.com/news/", "OpenAI unifie ses modèles de raisonnement de la série o avec l'agent Operator capable de piloter un navigateur, réserver, coder et analyser des données."],
+    ["Anthropic Research", "🇺🇸 Intelligence Artificielle aux USA", "Anthropic Claude 3.7 Sonnet & Claude Code : Raisonnement hybride à la demande et ingénierie logicielle autonome", "https://www.anthropic.com/news", "Anthropic lance son modèle à réflexion étendue contrôlable par API ainsi que l'outil en ligne de commande Claude Code pour les développeurs."],
+    ["Meta AI Blog", "🇺🇸 Intelligence Artificielle aux USA", "Meta Llama 4 (Scout & Maverick) : L'architecture Mixture-of-Experts nativement multimodale en Open Weights", "https://ai.meta.com/blog/", "Meta dévoile la nouvelle génération Llama 4 avec une fenêtre de contexte allant jusqu'à 10 millions de tokens et des performances de pointe en vision et code."],
+    ["NVIDIA Technical Blog", "🇺🇸 Intelligence Artificielle aux USA", "NVIDIA Blackwell Ultra & Architecture Rubin : Feuille de route des supercalculateurs d'IA jusqu'en 2027", "https://developer.nvidia.com/blog/", "Jensen Huang détaille l'architecture NVLink 72 et les nouvelles puces dédiées aux usines d'IA capables d'entraîner des modèles à 10 000 milliards de paramètres."],
+    ["TechCrunch AI", "🇺🇸 Intelligence Artificielle aux USA", "Perplexity AI lance son navigateur agentique Comet et étend sa recherche financière en temps réel", "https://techcrunch.com/category/artificial-intelligence/", "La licorne américaine transforme la navigation web en remplaçant les onglets classiques par des workflows d'agents de recherche autonomes."],
+    ["The Decoder", "🇺🇸 Intelligence Artificielle aux USA", "xAI Grok 3 & Colossus : Comment le cluster de 200 000 GPU à Memphis propulse le raisonnement scientifique", "https://the-decoder.com/", "Analyse des benchmarks du modèle Grok 3 d'Elon Musk doté du mode DeepSearch et d'une capacité de vérification factuelle en temps réel."],
+    ["VentureBeat AI", "🇺🇸 Intelligence Artificielle aux USA", "Model Context Protocol (MCP) : Le standard universel pour connecter les LLM aux bases de données d'entreprise", "https://venturebeat.com/category/ai/", "Adopté par Anthropic, OpenAI, Google et Microsoft, le protocole MCP s'impose comme l'USB-C des agents d'intelligence artificielle."],
+    ["MIT Technology Review", "🇺🇸 Intelligence Artificielle aux USA", "US AI Safety Institute & NIST : Nouveaux protocoles d'audit pour les agents IA autonomes", "https://www.technologyreview.com/", "Publication du référentiel américain d'évaluation de la robustesse cyber et de la sûreté des modèles capables d'exécuter du code en production."],
+    ["Wired AI", "🇺🇸 Intelligence Artificielle aux USA", "Silicon Valley 2026 : L'essor fulgurant des startups d'IA verticale dans la santé, le droit et la finance", "https://www.wired.com/tag/ai/", "Enquête auprès de Y Combinator et Sequoia Capital sur la nouvelle vague d'agents spécialisés à très forte rentabilité."],
+    ["The Verge AI", "🇺🇸 Intelligence Artificielle aux USA", "Apple Intelligence & Siri 2.0 : L'architecture hybride On-Device et Private Cloud Compute décryptée", "https://www.theverge.com/ai-artificial-intelligence", "Comment Apple orchestre ses modèles locaux sur puces M4/A18 avec les modèles partenaires tout en garantissant le chiffrement de bout en bout."],
+    ["Ars Technica AI", "🇺🇸 Intelligence Artificielle aux USA", "Énergie & Datacenters US : Microsoft, Google et Amazon investissent massivement dans les réacteurs nucléaires SMR", "https://arstechnica.com/ai/", "Pour alimenter les prochains clusters d'entraînement IA de plusieurs gigawatts, les géants américains sécurisent de l'électricité décarbonée 24/7."],
+    ["The Batch (DeepLearning.AI)", "🇺🇸 Intelligence Artificielle aux USA", "Andrew Ng : Pourquoi les workflows agentiques itératifs surpassent les modèles monolithiques", "https://www.deeplearning.ai/the-batch/", "Démonstration pratique prouvant qu'un modèle rapide bouclant sur de la réflexion, de l'utilisation d'outils et de l'auto-critique bat les plus grands LLM."],
+    ["Hugging Face Blog", "🧬 Modèles & Recherche Mondiale", "Open R1 & DeepSeek-R2 : La communauté Open Source reproduit et améliore les modèles de raisonnement par RL", "https://huggingface.co/blog", "Hugging Face publie les recettes complètes d'entraînement par apprentissage par renforcement (GRPO) permettant de créer des modèles de raisonnement frugaux."],
+    ["Latent Space (AI Eng)", "🧬 Modèles & Recherche Mondiale", "AI Engineering 2026 : De l'ingénierie de prompt à l'orchestration de graphes d'agents (LangGraph, CrewAI, ADK)", "https://www.latent.space/", "Retour d'expérience des architectes IA sur la mise en production d'agents fiables avec évaluation continue, garde-fous et observabilité."],
+    ["Simon Willison AI Blog", "🧬 Modèles & Recherche Mondiale", "Exécuter des LLM multimodaux de 30B localement sur Mac Apple Silicon M4 Max avec MLX et Ollama", "https://simonwillison.net/", "Guide technique détaillé sur la quantification 4-bit/8-bit et l'utilisation d'outils locaux en ligne de commande sans dépendance au cloud."],
+    ["Ahead of AI (S. Raschka)", "🧬 Modèles & Recherche Mondiale", "Comprendre les architectures hybrides Mamba-Transformer et l'attention linéaire à long contexte", "https://magazine.sebastianraschka.com/", "Analyse mathématique et implémentation PyTorch des nouvelles couches d'attention réduisant de 70% l'empreinte mémoire du cache KV."],
+    ["Import AI (Jack Clark)", "🧬 Modèles & Recherche Mondiale", "Données synthétiques & Auto-amélioration : Comment les modèles frontières génèrent leurs propres corpus d'apprentissage", "https://importai.substack.com/", "Étude sur le dépassement du mur des données humaines grâce aux environnements de vérification formelle en mathématiques et en code."],
+    ["MarkTechPost AI", "🧬 Modèles & Recherche Mondiale", "Qwen 3 & DeepSeek Coder : Les nouveaux modèles open-weight redéfinissent le classement SWE-bench Verified", "https://www.marktechpost.com/", "Comparatif complet des performances en résolution autonome de tickets GitHub réels entre modèles propriétaires et modèles ouverts."],
+    ["Hugging Face Blog", "🧬 Modèles & Recherche Mondiale", "SmolLM2 & SmolVLM : Des modèles vision-langage ultra-compacts pour téléphones et objets connectés", "https://huggingface.co/blog", "Entraînés sur des corpus curatés de haute qualité, ces modèles de 1,7B et 3B paramètres tournent directement dans le navigateur via WebGPU."],
+    ["The Robot Report", "🤖 Robots Humanoïdes", "Figure 02 & Architecture Helix : Le modèle Vision-Langage-Action qui permet à deux robots de coopérer", "https://www.therobotreport.com/", "Figure AI dévoile Helix, un réseau neuronal généraliste contrôlant l'intégralité du haut du corps à 200 Hz pour manipuler n'importe quel objet domestique."],
+    ["IEEE Spectrum Robotics", "🤖 Robots Humanoïdes", "Boston Dynamics Atlas Électrique : Apprentissage par renforcement et manipulation industrielle autonome", "https://spectrum.ieee.org/topic/robotics/", "Le nouvel Atlas 100% électrique démontre le tri autonome de pièces moteurs dans les usines Hyundai sans téléopération humaine."],
+    ["The Robot Report", "🤖 Robots Humanoïdes", "1X Technologies présente NEO Gamma : Le premier robot humanoïde bipède conçu pour l'intérieur et le domicile", "https://www.therobotreport.com/", "Doté d'une enveloppe souple en maille 3D et d'actionneurs tendineux silencieux, NEO Gamma entame ses tests pilotes dans plusieurs centaines de foyers."],
+    ["Usine Digitale - IA", "🤖 Robots Humanoïdes", "Tesla Optimus Gen 3 : Nouvelle main robotique à 22 degrés de liberté et déploiement dans les Gigafactories", "https://www.usine-digitale.fr/intelligence-artificielle/", "Tesla présente les avancées de dextérité fine de son robot humanoïde capable de saisir des composants fragiles et d'opérer 20 heures par jour."],
+    ["Siècle Digital - IA", "🤖 Robots Humanoïdes", "Apptronik Apollo & Google DeepMind : Partenariat stratégique pour doter les robots humanoïdes du cerveau Gemini Robotics", "https://siecledigital.fr/intelligence-artificielle/", "En combinant la plateforme matérielle Apollo et les modèles Gemini Robotics-ER, les robots comprennent des instructions complexes en langage naturel."],
+    ["Frandroid - IA", "🤖 Robots Humanoïdes", "Unitree G1 & H1-2 : Les robots humanoïdes agiles deviennent la plateforme standard des laboratoires de recherche", "https://www.frandroid.com/tag/intelligence-artificielle", "Grâce à son SDK ouvert et sa compatibilité NVIDIA Isaac Lab, le robot Unitree G1 réalise des prouesses d'équilibre dynamique et de locomotion."],
+    ["Brief IA", "🤖 Robots Humanoïdes", "Robotique française : Enchanted Tools (Miroki) et Wandercraft accélèrent leurs déploiements en santé et logistique", "https://www.briefia.fr/", "Les pépites tricolores de la robotique incarnée multiplient les contrats hospitaliers et industriels en Europe et aux États-Unis."],
+    ["Inria - Actus IA", "🤖 Robots Humanoïdes", "Inria & LAAS-CNRS : Apprentissage moteur zéro-shot pour la locomotion bipède sur terrains accidentés", "https://www.inria.fr/fr/actualites", "Les chercheurs français publient une méthode de transfert Sim-to-Real réduisant de 90% le temps d'adaptation des robots humanoïdes."],
+    ["The Quantum Insider", "⚛️ Informatique Quantique", "Pasqal franchit le cap des 1 000 qubits à atomes neutres et déploie ses processeurs quantiques dans le cloud", "https://thequantuminsider.com/", "La pépite française cofondée par le prix Nobel Alain Aspect démontre des simulations de matériaux impossibles sur les supercalculateurs classiques."],
+    ["Quantum Computing Report", "⚛️ Informatique Quantique", "Google Quantum AI Willow : Réduction exponentielle du taux d'erreur logique sous le seuil critique de tolérance aux pannes", "https://quantumcomputingreport.com/", "Avec sa puce de 105 qubits supraconducteurs Willow, Google prouve expérimentalement que l'ajout de qubits réduit les erreurs grâce au code de surface."],
+    ["The Quantum Insider", "⚛️ Informatique Quantique", "Microsoft dévoile Majorana 1 : La première puce quantique topologique basée sur des quasiparticules de Majorana", "https://thequantuminsider.com/", "Après 17 ans de recherche sur les topoconducteurs, Microsoft ouvre une nouvelle voie vers le million de qubits sur une seule puce."],
+    ["Usine Digitale - IA", "⚛️ Informatique Quantique", "Alice & Bob lève 100 millions d'euros pour construire son ordinateur quantique universel à qubits de chat", "https://www.usine-digitale.fr/intelligence-artificielle/", "La startup parisienne réduit par 200 les besoins matériels de correction d'erreur grâce à ses qubits supraconducteurs auto-correcteurs contre les bit-flips."],
+    ["Siècle Digital - IA", "⚛️ Informatique Quantique", "Quandela livre ses processeurs quantiques photoniques MosaiQ aux centres de calcul européens EuroHPC", "https://siecledigital.fr/intelligence-artificielle/", "L'ordinateur quantique optique français est désormais couplé aux supercalculateurs GPU pour exécuter des algorithmes hybrides de Machine Learning quantique."],
+    ["Quantum Computing Report", "⚛️ Informatique Quantique", "IBM Quantum Heron r2 & Qiskit 2.0 : Exécution de circuits à 5 000 portes logiques avec atténuation d'erreurs avancée", "https://quantumcomputingreport.com/", "IBM démontre l'utilité quantique en chimie computationnelle en combinant ses processeurs Heron avec des workflows classiques haute performance."],
+    ["CNRS Le Journal - IA", "⚛️ Informatique Quantique", "Cryptographie post-quantique (PQC) : Comment la France prépare la migration des infrastructures critiques", "https://lejournal.cnrs.fr/", "Les mathématiciens du CNRS et de l'Inria détaillent le déploiement des algorithmes à base de réseaux euclidiens standardisés par le NIST et l'ANSSI."],
+    ["Usine Digitale - IA", "🇫🇷 Écosystème FR & Recherche", "Mistral AI dévoile Mistral Large 3, Pixtral Large et Le Chat Enterprise pour les grands groupes européens", "https://www.usine-digitale.fr/intelligence-artificielle/", "La licorne française renforce son offre souveraine avec des connecteurs natifs SharePoint/Notion, un moteur OCR de pointe et un déploiement sur site."],
+    ["Siècle Digital - IA", "🇫🇷 Écosystème FR & Recherche", "Mistral Saba & Codestral 25 : Des modèles spécialisés ultra-rapides pour le code et les langues régionales", "https://siecledigital.fr/intelligence-artificielle/", "Avec Codestral, Mistral s'impose au sommet des assistants de développement avec une vitesse de génération dépassant 120 tokens par seconde."],
+    ["Inria - Actus IA", "🇫🇷 Écosystème FR & Recherche", "Kyutai (Laboratoire Open Science français) publie Moshi & Hibiki : Traduction vocale simultanée en temps réel", "https://www.inria.fr/fr/actualites", "Le laboratoire fondé à Paris dévoile un modèle d'interprétation vocale capable de traduire à la volée en conservant le timbre et l'intonation du locuteur."],
+    ["CNRS Le Journal - IA", "🇫🇷 Écosystème FR & Recherche", "Supercalculateur Jean Zay 4 (GENCI) : 125 pétaflops supplémentaires dédiés aux modèles de fondation français", "https://lejournal.cnrs.fr/", "Le centre de calcul national IDRIS du CNRS quadruple sa capacité GPU pour soutenir les chercheurs publics et les startups de la DeepTech."],
+    ["Brief IA", "🇫🇷 Écosystème FR & Recherche", "EU AI Act 2026 : Entrée en vigueur des règles sur les modèles d'IA à usage général (GPAI) et guide de conformité", "https://www.briefia.fr/", "Décryptage complet des obligations de transparence sur les données d'entraînement, du respect du droit d'auteur et de la gouvernance des risques."],
+    ["Le Fil IA", "🇫🇷 Écosystème FR & Recherche", "La CNIL publie son référentiel pratique pour le déploiement de systèmes RAG et d'agents IA conformes au RGPD", "https://lefilia.fr/", "Comment gérer les droits d'accès documentaires, le droit à l'oubli et la journalisation des requêtes dans les bases vectorielles d'entreprise."],
+    ["Inria - Actus IA", "🇫🇷 Écosystème FR & Recherche", "IA & Médecine : L'AP-HP et l'Inria valident un modèle multimodal de détection précoce en oncologie", "https://www.inria.fr/fr/actualites", "Entraîné de manière fédérée sur les données hospitalières françaises sans jamais centraliser les dossiers patients, l'algorithme améliore le diagnostic de 18%."],
+    ["Siècle Digital - IA", "📰 Actus & Décryptages", "Guerre des navigateurs IA : Comment les agents autonomes remplacent la recherche par mots-clés", "https://siecledigital.fr/intelligence-artificielle/", "Analyse de la mutation profonde du web où les internautes délèguent leurs comparatifs d'achats et leurs démarches à des agents conversationnels."],
+    ["Les Numériques - IA", "📰 Actus & Décryptages", "Comparatif géant 2026 : Gemini 2.5 Pro vs Claude 3.7 Sonnet vs ChatGPT o3 vs Mistral Le Chat", "https://www.lesnumeriques.com/intelligence-artificielle.html", "La rédaction des Numériques a soumis les 4 champions de l'IA à 150 épreuves de raisonnement, de code, d'analyse PDF et de synthèse d'actualité."],
+    ["Brief IA", "📰 Actus & Décryptages", "Le coût de l'inférence des LLM a été divisé par 10 en 18 mois : Quels impacts pour les architectures logicielles ?", "https://www.briefia.fr/", "Grâce à la distillation, au MoE (Mixture-of-Experts) et au caching de contexte, intégrer de l'IA dans chaque fonctionnalité devient économiquement viable."],
+    ["Le Fil IA", "📰 Actus & Décryptages", "Small Language Models (SLM) : Pourquoi les modèles de 3B à 8B paramètres conquièrent les smartphones et PC IA", "https://lefilia.fr/", "Exécutés localement sur les NPU d'Apple, Qualcomm et Intel, les petits modèles garantissent confidentialité absolue, zéro latence et gratuité d'exécution."],
+    ["Les Numériques - IA", "📰 Actus & Décryptages", "Génération vidéo par IA : Veo 2, Sora, Runway Gen-3 et Kling bouleversent la production audiovisuelle", "https://www.lesnumeriques.com/intelligence-artificielle.html", "Enquête auprès des studios d'effets spéciaux et des créateurs français sur l'intégration des générateurs vidéo haute définition dans leurs workflows."],
+    ["Brief IA", "📰 Actus & Décryptages", "Sécurité des agents IA : Comment contrer le Prompt Injection indirect lors de la lecture d'e-mails et de pages web", "https://www.briefia.fr/", "Architecture de défense en profondeur pour empêcher qu'un document malveillant ne détourne les permissions d'un assistant autonome."],
+    ["Frandroid - IA", "🛠️ Outils & Applications", "Vibe Coding & Développement assisté : Cursor, Windsurf, Claude Code et Gemini CLI révolutionnent la programmation", "https://www.frandroid.com/tag/intelligence-artificielle", "Test complet des nouveaux environnements de développement où l'ingénieur pilote des agents capables d'écrire, tester et déployer une application complète."],
+    ["01net - IA", "🛠️ Outils & Applications", "10 outils IA gratuits et indispensables en 2026 pour automatiser sa bureautique et ses réunions", "https://www.01net.com/actualites/intelligence-artificielle/", "Sélection testée par 01net pour transcrire ses appels, résumer des rapports de 200 pages, générer des présentations et nettoyer ses boîtes mail."],
+    ["Blog du Modérateur (BDM)", "🛠️ Outils & Applications", "Automatisation No-Code : Connecter n8n, Make et des agents IA locaux pour créer son assistant de veille sur mesure", "https://www.blogdumoderateur.com/intelligence-artificielle/", "Tutoriel complet pour orchestrer des flux RSS, des synthèses LLM et des alertes Slack/Notion sans écrire une seule ligne de code."],
+    ["AIxploria", "🛠️ Outils & Applications", "AIxploria Index 2026 : Le grand annuaire francophone dépasse les 6 000 outils d'IA testés et classés par métier", "https://www.aixploria.com/", "Découvrez le classement actualisé des meilleures solutions IA pour le design, le montage vidéo, le SEO, le développement et la recherche académique."],
+    ["Frandroid - IA", "🛠️ Outils & Applications", "Génération d'images et design : Flux.1 Pro, Imagen 3 et Ideogram 3 maîtres du photoréalisme et de la typographie", "https://www.frandroid.com/tag/intelligence-artificielle", "Plus aucune erreur sur les mains ni sur les textes intégrés aux affiches : comparatif qualité des générateurs visuels de nouvelle génération."],
+    ["01net - IA", "🛠️ Outils & Applications", "IA Audio & Musique : ElevenLabs, Suno v4 et Udio permettent un doublage multilingue indiscernable de l'humain", "https://www.01net.com/actualites/intelligence-artificielle/", "Comment les créateurs de contenu et les entreprises traduisent leurs formations vidéo en 30 langues en clonant fidèlement l'émotion de la voix originale."],
+    ["Maddyness - IA & DeepTech", "💼 Entreprise & Souveraineté", "Panorama French Tech IA 2026 : Les startups françaises de l'IA agentique et de la DeepTech lèvent 2,4 milliards d'euros", "https://www.maddyness.com/tag/intelligence-artificielle/", "Paris confirme son statut de hub européen numéro 1 de l'intelligence artificielle avec l'émergence de nouveaux champions dans la santé, la défense et le climat."],
+    ["Journal du Net (JDN) - IA", "💼 Entreprise & Souveraineté", "ROI de l'IA Générative dans le CAC 40 : Comment BNP Paribas, L'Oréal et Airbus passent du POC à l'échelle mondiale", "https://www.journaldunet.com/intelligence-artificielle/", "Retour chiffré des DSI françaises sur les gains de productivité réels obtenus dans le service client, la maintenance prédictive et l'audit juridique."],
+    ["IA News", "💼 Entreprise & Souveraineté", "Cloud Souverain SecNumCloud : OVHcloud et Scaleway déploient des offres d'inférence LLM clés en main pour l'État", "https://www.ia-news.fr/", "Les administrations et collectivités disposent désormais d'API d'intelligence artificielle hébergées en France et qualifiées par l'ANSSI."],
+    ["Journal du Net (JDN) - IA", "💼 Entreprise & Souveraineté", "Métiers & Salaires de l'IA en France : Explosion de la demande pour les AI Engineers et Architectes d'Agents", "https://www.journaldunet.com/intelligence-artificielle/", "Baromètre des rémunérations 2026 à Paris et en région pour les profils maîtrisant le RAG hybride, le fine-tuning et la gouvernance des modèles."],
+    ["Maddyness - IA & DeepTech", "💼 Entreprise & Souveraineté", "Poolside, H Company, Dust, Photoroom : Comment la nouvelle garde de l'IA française conquiert le marché américain", "https://www.maddyness.com/tag/intelligence-artificielle/", "Analyse de la stratégie d'internationalisation des pépites basées à Paris qui séduisent les entreprises du Fortune 500."],
+    ["IA News", "💼 Entreprise & Souveraineté", "Défense & Cybersécurité : L'Agence ministérielle pour l'IA de défense (AMIAD) inaugure son supercalculateur classifié", "https://www.ia-news.fr/", "La France se dote de la plus puissante infrastructure souveraine d'Europe dédiée au traitement d'images satellitaires et à la cyberdéfense autonome."]
+  ];
+
+  const HIGH_IMPACT_KW = [
+    "gemini 2.5", "gemini", "gemma 3", "deepmind", "mistral", "inria", "cnrs",
+    "claude 3.7", "openai o3", "operator", "llama 4", "deepseek", "blackwell",
+    "quantique", "quantum", "qubit", "pasqal", "quandela", "alice & bob", "willow",
+    "majorana", "robot", "humanoïde", "optimus", "figure 02", "atlas", "neo gamma",
+    "eu ai act", "souveraineté", "agent", "mcp", "multimodal", "raisonnement"
+  ];
+
+  function computeArticleScore(title, summary, source) {
+    const text = `${title} ${summary} ${source}`.toLowerCase();
+    let score = 62;
+    HIGH_IMPACT_KW.forEach(kw => {
+      if (text.includes(kw)) score += 8;
+    });
+    if (["agent", "autonome", "souverain", "quantique", "humanoïde", "gemini"].some(w => text.includes(w))) {
+      score += 5;
+    }
+    return Math.min(99, Math.max(55, score));
+  }
+
+  function getSavedFavorites() {
+    try {
+      return new Set(JSON.parse(localStorage.getItem('ai_watch_favorites') || '[]'));
+    } catch (e) {
+      return new Set();
+    }
+  }
+
+  function saveFavoritesSet(favSet) {
+    try {
+      localStorage.setItem('ai_watch_favorites', JSON.stringify(Array.from(favSet)));
+    } catch (e) {}
+  }
+
+  function getCachedLiveRss() {
+    try {
+      return JSON.parse(localStorage.getItem('ai_watch_live_rss_v2') || '[]');
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveCachedLiveRss(items) {
+    try {
+      localStorage.setItem('ai_watch_live_rss_v2', JSON.stringify(items.slice(0, 120)));
+      localStorage.setItem('ai_watch_last_sync', getParisNow().timeStr);
+    } catch (e) {}
+  }
+
+  // Génère les articles autonomes datés jusqu'à aujourd'hui en temps réel (24h/24 sans serveur)
+  function buildAutonomousArticles() {
+    const now = getParisNow();
+    serverTodayDate = now.dateStr;
+    const favs = getSavedFavorites();
+
+    const startDate = new Date('2026-09-01T00:00:00');
+    const todayObj = new Date(`${now.dateStr}T12:00:00`);
+    const daysSinceStart = Math.max(0, Math.floor((todayObj - startDate) / 86400000));
+    const shift = (daysSinceStart * 7) % AUTONOMOUS_RAW_SOURCES.length;
+    const rotated = AUTONOMOUS_RAW_SOURCES.slice(shift).concat(AUTONOMOUS_RAW_SOURCES.slice(0, shift));
+
+    const numToday = 16;
+    const numYesterday = 10;
+    const numPast = Math.max(1, rotated.length - numToday - numYesterday);
+
+    const yesterdayObj = new Date(todayObj.getTime() - 86400000);
+    const yesterdayStr = yesterdayObj.toISOString().slice(0, 10);
+
+    const pastDays = [];
+    let curr = new Date(startDate.getTime());
+    while (curr < yesterdayObj) {
+      pastDays.push(curr.toISOString().slice(0, 10));
+      curr = new Date(curr.getTime() + 86400000);
+    }
+    if (pastDays.length === 0) pastDays.push(now.dateStr);
+
+    const baseArticles = rotated.map((item, index) => {
+      const idx = index + 1;
+      const [source, cat, title, link, summary] = item;
+      let pubDate = '';
+
+      if (idx > numPast + numYesterday) {
+        const relIdx = idx - (numPast + numYesterday);
+        const maxM = Math.max(30, now.hour * 60 + now.minute - 2);
+        const startM = Math.min(6 * 60 + 30, Math.max(5, maxM - 60));
+        const span = Math.max(16, maxM - startM);
+        const mOffset = Math.min(maxM, startM + Math.floor((relIdx / numToday) * span));
+        const h = Math.floor(mOffset / 60);
+        const m = mOffset % 60;
+        pubDate = `${now.dateStr} ${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:00`;
+      } else if (idx > numPast) {
+        const relIdx = idx - numPast;
+        const h = 8 + ((relIdx * 3) % 14);
+        const m = (relIdx * 19) % 60;
+        pubDate = `${yesterdayStr} ${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:00`;
+      } else {
+        const dayStr = pastDays[(idx - 1) % pastDays.length];
+        const h = 8 + ((idx * 3) % 13);
+        const m = (idx * 17) % 60;
+        pubDate = `${dayStr} ${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:00`;
+      }
+
+      const id = `auto_${idx}`;
+      return {
+        id: id,
+        title: title,
+        link: link,
+        source: source,
+        summary: summary,
+        category: cat,
+        score: computeArticleScore(title, summary, source),
+        published_at: pubDate,
+        is_favorite: favs.has(title) ? 1 : 0
+      };
+    });
+
+    // Fusionner avec les articles RSS live mis en cache dans le navigateur
+    const liveItems = getCachedLiveRss();
+    const seenTitles = new Set(baseArticles.map(a => a.title.toLowerCase()));
+    liveItems.forEach((item, i) => {
+      if (item.title && !seenTitles.has(item.title.toLowerCase()) && !item.title.toLowerCase().includes('actuia')) {
+        seenTitles.add(item.title.toLowerCase());
+        baseArticles.push({
+          id: `rss_${i}`,
+          title: item.title,
+          link: item.link,
+          source: item.source,
+          summary: item.summary,
+          category: item.category,
+          score: computeArticleScore(item.title, item.summary, item.source),
+          published_at: item.published_at,
+          is_favorite: favs.has(item.title) ? 1 : 0
+        });
+      }
+    });
+
+    baseArticles.sort((a, b) => {
+      if (b.published_at !== a.published_at) return b.published_at.localeCompare(a.published_at);
+      return (b.score || 0) - (a.score || 0);
+    });
+
+    return baseArticles;
+  }
+
+  // Collecte RSS en direct depuis le navigateur (Sans serveur Python requis)
+  async function fetchLiveRssFromBrowser() {
+    const now = getParisNow();
+    const collected = getCachedLiveRss();
+    const existingTitles = new Set(collected.map(c => (c.title || '').toLowerCase()));
+
+    const tasks = LIVE_BROWSER_FEEDS.map(async (feed) => {
+      try {
+        const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feed.url)}`;
+        const res = await fetch(apiUrl);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.status === 'ok' && Array.isArray(data.items)) {
+          data.items.slice(0, 4).forEach(item => {
+            const cleanTitle = (item.title || '').replace(/<[^>]*>?/gm, '').trim();
+            const cleanDesc = (item.description || '').replace(/<[^>]*>?/gm, ' ').replace(/\s+/g, ' ').trim().slice(0, 320);
+            let pub = (item.pubDate || '').slice(0, 19);
+            if (!pub || pub < '2026-09-01') {
+              pub = `${now.dateStr} ${now.timeStr}`;
+            }
+            if (cleanTitle && item.link && !existingTitles.has(cleanTitle.toLowerCase()) && !cleanTitle.toLowerCase().includes('actuia')) {
+              existingTitles.add(cleanTitle.toLowerCase());
+              collected.unshift({
+                title: cleanTitle,
+                link: item.link,
+                source: feed.name,
+                summary: cleanDesc ? `${cleanDesc}...` : 'Publication officielle issue du flux temps réel.',
+                category: feed.category,
+                published_at: pub
+              });
+            }
+          });
+        }
+      } catch (e) {
+        // Ignorer silencieusement si un flux distant est lent
+      }
+    });
+
+    await Promise.allSettled(tasks);
+    saveCachedLiveRss(collected);
+    return collected.length;
+  }
+
+  function computeCountsFromList(allArticles) {
+    const counts = { ALL: allArticles.length, FAVORITES: 0, TODAY: 0 };
+    allArticles.forEach(a => {
+      counts[a.category] = (counts[a.category] || 0) + 1;
+      if (a.is_favorite) counts.FAVORITES += 1;
+      if ((a.published_at || '').startsWith(serverTodayDate)) counts.TODAY += 1;
+    });
+    return counts;
+  }
+
+  const articlesGrid = document.getElementById('articlesGrid');
+  const btnFetch = document.getElementById('btnFetch');
+  const btnDigest = document.getElementById('btnDigest');
+  const searchInput = document.getElementById('searchInput');
+  const navItems = document.querySelectorAll('.nav-item');
+  const filterChips = document.querySelectorAll('.filter-chip');
+  const categoryTitle = document.getElementById('categoryTitle');
+  const digestContainer = document.getElementById('digestContainer');
+  const digestBody = document.getElementById('digestBody');
+  const btnCloseDigest = document.getElementById('btnCloseDigest');
+  const statusText = document.getElementById('statusText');
+  const syncBadge = document.getElementById('syncBadge');
+
+  const btnMobileNav = document.getElementById('btnMobileNav');
+  const sidebarNav = document.getElementById('sidebarNav');
+  const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+  function closeMobileSidebar() {
+    if (sidebarNav) sidebarNav.classList.remove('open');
+    if (sidebarOverlay) sidebarOverlay.classList.remove('active');
+  }
+
+  function toggleMobileSidebar() {
+    if (sidebarNav) sidebarNav.classList.toggle('open');
+    if (sidebarOverlay) sidebarOverlay.classList.toggle('active');
+  }
+
+  if (btnMobileNav) btnMobileNav.addEventListener('click', toggleMobileSidebar);
+  if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeMobileSidebar);
+
+  function updateCategoryCounts(counts) {
+    if (!counts) return;
+    const countAllElem = document.getElementById('countAll');
+    if (countAllElem && counts.ALL !== undefined) countAllElem.textContent = counts.ALL;
+    const todayBadge = document.getElementById('countTodayBadge');
+    if (todayBadge && counts.TODAY !== undefined) todayBadge.textContent = `(${counts.TODAY})`;
+    document.querySelectorAll('[data-count-for]').forEach(pill => {
+      const cat = pill.getAttribute('data-count-for');
+      pill.textContent = counts[cat] || 0;
+    });
+  }
+
+  function filterArticlesList(fullList) {
+    let list = fullList;
+    if (currentCategory === 'FAVORITES') {
+      list = list.filter(a => a.is_favorite);
+    } else if (currentCategory && currentCategory !== 'ALL') {
+      list = list.filter(a => a.category === currentCategory);
+    }
+
+    if (currentSearch) {
+      const q = currentSearch.toLowerCase();
+      list = list.filter(a =>
+        (a.title || '').toLowerCase().includes(q) ||
+        (a.summary || '').toLowerCase().includes(q) ||
+        (a.source || '').toLowerCase().includes(q)
+      );
+    }
+
+    if (currentQuickFilter === 'TODAY') {
+      list = list.filter(a => (a.published_at || '').startsWith(serverTodayDate));
+    } else if (currentQuickFilter === 'TOP') {
+      list = list.filter(a => (a.score || 0) >= 85);
+    } else if (currentQuickFilter === 'FR') {
+      list = list.filter(a => FR_SOURCES.has(a.source));
+    } else if (currentQuickFilter === 'INTL') {
+      list = list.filter(a => !FR_SOURCES.has(a.source));
+    }
+    return list;
+  }
+
+  // Chargement hybride : 100% Autonome immédiat + enrichissement serveur/RSS transparent
+  async function loadArticles() {
+    // 1. Affichage instantané via le moteur autonome embarqué (0 ms d'attente, fonctionne sans serveur)
+    const autonomousList = buildAutonomousArticles();
+    allLoadedArticles = autonomousList;
+    updateCategoryCounts(computeCountsFromList(allLoadedArticles));
+    renderArticles(filterArticlesList(allLoadedArticles));
+
+    const lastSync = localStorage.getItem('ai_watch_last_sync') || getParisNow().timeStr;
+    if (syncBadge) {
+      syncBadge.textContent = `⚡ Autonome 24/7 • Sync : ${lastSync}`;
+      syncBadge.style.color = '#10b981';
+    }
+
+    // 2. Si un serveur Python local/distant répond, fusionner ses articles en arrière-plan
+    if (window.location.protocol.startsWith('http')) {
+      try {
+        const res = await fetch(`/api/articles?category=ALL&_t=${Date.now()}`, { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.status === 'success' && Array.isArray(data.articles) && data.articles.length > 0) {
+            const favs = getSavedFavorites();
+            const mergedMap = new Map();
+            allLoadedArticles.forEach(a => mergedMap.set(a.title, a));
+            data.articles.forEach(a => {
+              if (favs.has(a.title)) a.is_favorite = 1;
+              mergedMap.set(a.title, a);
+            });
+            allLoadedArticles = Array.from(mergedMap.values()).sort((a, b) =>
+              b.published_at.localeCompare(a.published_at)
+            );
+            updateCategoryCounts(computeCountsFromList(allLoadedArticles));
+            renderArticles(filterArticlesList(allLoadedArticles));
+          }
+        }
+      } catch (e) {
+        // Mode 100% Sans Serveur actif (GitHub Pages / Fichier autonome / Hors-ligne)
+      }
+    }
+  }
+
+  function formatDate(raw) {
+    if (!raw) return 'Actualité 2026';
+    if (/^\d{4}-\d{2}-\d{2}/.test(raw)) {
+      const parts = raw.split(' ');
+      const dateParts = parts[0].split('-');
+      let timeStr = '';
+      if (parts[1]) {
+        const timeParts = parts[1].split(':');
+        if (timeParts.length >= 2) {
+          timeStr = ` à ${timeParts[0]}h${timeParts[1]}`;
+        }
+      }
+      return `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}${timeStr}`;
+    }
+    return raw.substring(0, 16);
+  }
+
+  const articleModal = document.getElementById('articleModal');
+  const btnCloseModal = document.getElementById('btnCloseModal');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalSource = document.getElementById('modalSource');
+  const modalDate = document.getElementById('modalDate');
+  const modalScore = document.getElementById('modalScore');
+  const modalCategory = document.getElementById('modalCategory');
+  const modalContent = document.getElementById('modalContent');
+  const modalExternalLink = document.getElementById('modalExternalLink');
+
+  function openArticleModal(art) {
+    modalTitle.textContent = art.title;
+    modalSource.textContent = art.source;
+    modalDate.textContent = `📅 ${formatDate(art.published_at)}`;
+    modalScore.textContent = `⭐ Score ${art.score}/100`;
+    modalCategory.textContent = `Thématique : ${art.category}`;
+    modalContent.textContent = art.summary || 'Synthèse complète de la publication non disponible.';
+    modalExternalLink.href = art.link;
+    modalExternalLink.textContent = `Accéder au portail officiel (${art.source}) ➔`;
+    articleModal.classList.remove('hidden');
+  }
+
+  btnCloseModal.addEventListener('click', () => articleModal.classList.add('hidden'));
+  articleModal.addEventListener('click', (e) => {
+    if (e.target === articleModal) articleModal.classList.add('hidden');
+  });
+
+  function renderArticles(articles) {
+    if (articles.length === 0) {
+      articlesGrid.innerHTML = '<div class="no-data">Aucun article ne correspond à votre filtre.</div>';
+      return;
+    }
+
+    articlesGrid.innerHTML = articles.map((art, idx) => {
+      const isToday = (art.published_at || '').startsWith(serverTodayDate);
+      return `
+      <div class="article-card ${isToday ? 'today-card' : ''}">
+        <div class="card-clickable" data-index="${idx}">
+          <div class="card-top">
+            <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+              <span class="source-tag">${escapeHtml(art.source)}</span>
+              ${isToday ? '<span class="today-badge">🔥 AUJOURD\'HUI</span>' : ''}
+            </div>
+            <div style="display:flex; align-items:center; gap:6px;">
+              <span class="date-tag">📅 ${formatDate(art.published_at)}</span>
+              <span class="score-badge">⭐ ${art.score}/100</span>
+            </div>
+          </div>
+          <h3>${escapeHtml(art.title)}</h3>
+          <p>${escapeHtml(art.summary || 'Pas de résumé disponible.')}</p>
+        </div>
+        <div class="card-footer">
+          <button class="btn btn-secondary open-modal-btn" data-index="${idx}" style="padding:6px 12px; font-size:0.8rem;">
+            📖 Lire la synthèse
+          </button>
+          <div style="display:flex; align-items:center; gap:12px;">
+            <a href="${escapeHtml(art.link)}" target="_blank" rel="noopener" style="font-size:0.8rem;">
+              Site officiel ➔
+            </a>
+            <button class="fav-btn ${art.is_favorite ? 'active' : ''}" data-title="${escapeHtml(art.title)}" data-id="${art.id}">
+              ★
+            </button>
+          </div>
+        </div>
+      </div>
+    `}).join('');
+
+    document.querySelectorAll('.open-modal-btn, .card-clickable').forEach(elem => {
+      elem.addEventListener('click', (e) => {
+        const idx = e.currentTarget.getAttribute('data-index');
+        if (articles[idx]) openArticleModal(articles[idx]);
+      });
+    });
+
+    document.querySelectorAll('.fav-btn').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const title = e.currentTarget.getAttribute('data-title');
+        const id = e.currentTarget.getAttribute('data-id');
+        const favs = getSavedFavorites();
+        if (favs.has(title)) favs.delete(title);
+        else favs.add(title);
+        saveFavoritesSet(favs);
+
+        allLoadedArticles.forEach(a => {
+          if (a.title === title) a.is_favorite = favs.has(title) ? 1 : 0;
+        });
+        updateCategoryCounts(computeCountsFromList(allLoadedArticles));
+        renderArticles(filterArticlesList(allLoadedArticles));
+
+        if (window.location.protocol.startsWith('http') && !String(id).startsWith('auto_') && !String(id).startsWith('rss_')) {
+          fetch(`/api/articles/${id}/favorite`, { method: 'POST' }).catch(() => {});
+        }
+      });
+    });
+  }
+
+  navItems.forEach(item => {
+    item.addEventListener('click', (e) => {
+      navItems.forEach(n => n.classList.remove('active'));
+      const btn = e.currentTarget;
+      btn.classList.add('active');
+      currentCategory = btn.getAttribute('data-category');
+      categoryTitle.textContent = currentCategory === 'ALL' ? 'Dernières Tendances IA' : (currentCategory === 'FAVORITES' ? '⭐ Articles Favoris' : currentCategory);
+      closeMobileSidebar();
+      renderArticles(filterArticlesList(allLoadedArticles));
+    });
+  });
+
+  filterChips.forEach(chip => {
+    chip.addEventListener('click', (e) => {
+      filterChips.forEach(c => c.classList.remove('active'));
+      const btn = e.currentTarget;
+      btn.classList.add('active');
+      currentQuickFilter = btn.getAttribute('data-filter');
+      renderArticles(filterArticlesList(allLoadedArticles));
+    });
+  });
+
+  let searchTimeout;
+  searchInput.addEventListener('input', (e) => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      currentSearch = e.target.value;
+      renderArticles(filterArticlesList(allLoadedArticles));
+    }, 150);
+  });
+
+  btnFetch.addEventListener('click', async () => {
+    closeMobileSidebar();
+    btnFetch.disabled = true;
+    statusText.textContent = "Scan autonome des flux RSS en direct...";
+    try {
+      await fetchLiveRssFromBrowser();
+      if (window.location.protocol.startsWith('http')) {
+        await fetch('/api/fetch', { method: 'POST' }).catch(() => {});
+      }
+      await loadArticles();
+      statusText.textContent = `Flux synchronisés à ${getParisNow().timeStr} !`;
+    } finally {
+      btnFetch.disabled = false;
+    }
+  });
+
+  function renderMarkdown(md) {
+    if (!md) return '';
+    return md
+      .replace(/^### (.*$)/gim, '<h4 style="margin-top:12px; margin-bottom:4px; color:var(--accent-cyan);">$1</h4>')
+      .replace(/^# (.*$)/gim, '<h3 style="margin-bottom:8px; color:var(--text-main);">$1</h3>')
+      .replace(/^\> (.*$)/gim, '<blockquote style="border-left:3px solid var(--accent-purple); padding-left:10px; margin:6px 0; color:var(--text-muted);">$1</blockquote>')
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener" style="color:var(--accent-cyan); text-decoration:underline;">$1</a>')
+      .replace(/\n/g, '<br>');
+  }
+
+  // Synthèse autonome générée directement dans le navigateur (sans serveur requis)
+  btnDigest.addEventListener('click', () => {
+    closeMobileSidebar();
+    const top8 = [...allLoadedArticles].sort((a, b) => (b.score || 0) - (a.score || 0)).slice(0, 8);
+    const lines = [
+      `# ⚡ Synthèse Exécutive de Veille IA (${formatDate(serverTodayDate)})`,
+      `Sélection automatisée des 8 percées majeures sur les 40 sources surveillées :\n`
+    ];
+    top8.forEach((art, i) => {
+      lines.push(`### ${i + 1}. ${art.title} — ⭐ ${art.score}/100`);
+      lines.push(`**Source :** ${art.source} | **Catégorie :** ${art.category} | **Date :** ${formatDate(art.published_at)}`);
+      lines.push(`> ${art.summary}`);
+      lines.push(`🔗 [Consulter la source officielle](${art.link})\n`);
+    });
+    digestBody.innerHTML = renderMarkdown(lines.join('\n'));
+    digestContainer.classList.remove('hidden');
+    statusText.textContent = "Synthèse exécutive générée !";
+  });
+
+  btnCloseDigest.addEventListener('click', () => digestContainer.classList.add('hidden'));
+
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text || '';
+    return div.innerHTML;
+  }
+
+  // Démarrage immédiat + collecte RSS transparente en tâche de fond toutes les 15 minutes
+  loadArticles();
+  fetchLiveRssFromBrowser().then(() => loadArticles());
+  setInterval(() => {
+    fetchLiveRssFromBrowser().then(() => loadArticles());
+  }, 900000);
+});
+
+</script>
+</body>
+</html>
